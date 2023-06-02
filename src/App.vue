@@ -4,8 +4,6 @@ import { RouterLink, RouterView } from "vue-router";
 
 <template>
   <RouterView />
-  <el-button type="primary" plain>Primary</el-button>
-  <div class="test">test scss</div>
 </template>
 
 <style scoped lang="scss">
