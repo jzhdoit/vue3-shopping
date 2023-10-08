@@ -1,5 +1,5 @@
 <script setup>
-import { getBannerAPI } from "@/apis/home";
+import { getBannerAPI } from "@/api/home";
 import { onMounted, ref } from "vue";
 const bannerList = ref([]);
 const getBanner = async () => {
@@ -36,3 +36,4 @@ onMounted(() => getBanner());
   }
 }
 </style>
+@/api/home

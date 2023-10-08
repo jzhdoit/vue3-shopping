@@ -1,6 +1,7 @@
+// 封装banner轮播图相关的业务代码
 import { ref, onMounted } from "vue";
-import { getBannerAPI } from "@/apis/home";
-
+import { getBannerAPI } from "@/api/home";
+//导出函数
 export function useBanner() {
   const bannerList = ref([]);
   const getBanner = async () => {
@@ -10,7 +11,7 @@ export function useBanner() {
 
     bannerList.value = res.result;
   };
-
+  //在onMounted中调用useBanner函数内部的getBanner函数
   onMounted(() => getBanner());
   return {
     bannerList,

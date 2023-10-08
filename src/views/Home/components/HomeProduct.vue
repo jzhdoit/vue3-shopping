@@ -1,12 +1,13 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import HomePanel from "./HomePanel.vue";
-import { getGoodsAPI } from "@/apis/home";
+import { getGoodsAPI } from "@/api/home";
 import GoodsItem from "./GoodsItem.vue";
 const goodsProduct = ref([]);
 const getGoods = async () => {
   const res = await getGoodsAPI();
   goodsProduct.value = res.result;
+  console.log(goodsProduct);
 };
 onMounted(() => getGoods());
 </script>
@@ -121,3 +122,4 @@ onMounted(() => getGoods());
   }
 }
 </style>
+@/api/home

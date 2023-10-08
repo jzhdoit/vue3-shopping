@@ -1,17 +1,18 @@
 <script setup>
-import { getCategoryFilterAPI, getSubCategoryAPI } from "@/apis/category";
+import { getCategoryFilterAPI, getSubCategoryAPI } from "@/api/category";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import GoodsItem from "../Home/components/GoodsItem.vue";
-
+// 获取面包屑导航数据
 const categoryData = ref({});
 const route = useRoute();
 const getCategoryDate = async () => {
   const res = await getCategoryFilterAPI(route.params.id);
   categoryData.value = res.result;
+  console.log(categoryData.value);
 };
 onMounted(() => getCategoryDate());
-
+//获取数据列表
 const goodList = ref([]);
 const reqData = ref({
   categoryId: route.params.id,
@@ -26,18 +27,21 @@ const getGoodList = async () => {
 };
 
 onMounted(() => getGoodList());
-
+//列表筛选实现
 const tabChange = () => {
-  console.log("tab切换l", reqData.value.sortField);
+  console.log("tab切换", reqData.value.sortField);
   reqData.value.page = 1;
   getGoodList();
+  
 };
+//无限加载实现
 const disable = ref(false);
 const load = async () => {
   console.log("加载更多数据");
   reqData.value.page++;
   const res = await getSubCategoryAPI(reqData.value);
   goodList.value = [...goodList.value, ...res.result.items];
+  // 加载完毕 停止监听
   if (res.result.items.length === 0) {
     disable.value = true;
   }
@@ -128,3 +132,4 @@ const load = async () => {
   }
 }
 </style>
+@/api/category

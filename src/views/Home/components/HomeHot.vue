@@ -1,6 +1,6 @@
 <script setup>
 import HomePanel from "./HomePanel.vue";
-import { getHotAPI } from "@/apis/home";
+import { getHotAPI } from "@/api/home";
 import { onMounted, ref } from "vue";
 const hotList = ref([]);
 const getHotList = async () => {
@@ -12,9 +12,9 @@ onMounted(() => getHotList());
 
 <template>
   <HomePanel title="人气推荐" sub-title="人气爆款 不容错过">
-    <ul class="goods-list">
+    <ul class="goods-list" title="人气推荐" sub-title="人气爆款 不容错过">
       <li v-for="item in hotList" :key="item.id">
-        <RouterLink to="/">
+        <RouterLink :to="`/detail/${item.id}`">
           <img v-img-lazy="item.picture" alt="" />
           <p class="name">{{ item.title }}</p>
           <p class="desc">{{ item.alt }}</p>
@@ -24,16 +24,16 @@ onMounted(() => getHotList());
   </HomePanel>
 </template>
 
-<style scoped lang="scss">
+<style scoped lang='scss'>
 .goods-list {
   display: flex;
   justify-content: space-between;
   height: 426px;
-
+}
   li {
     width: 306px;
     height: 406px;
-    transition: all 0.5s;
+    transition: all .5s;
 
     &:hover {
       transform: translate3d(0, -3px, 0);
@@ -56,5 +56,6 @@ onMounted(() => getHotList());
       font-size: 18px;
     }
   }
-}
+
 </style>
+@/api/home

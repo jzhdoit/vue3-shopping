@@ -1,26 +1,32 @@
-<template>
-  <div class="goods-sku">
-    <dl v-for="item in goods.specs" :key="item.id">
-      <dt>{{ item.name }}</dt>
-      <dd>
-        <template v-for="val in item.values" :key="val.name">
-          <img :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)"
-            v-if="val.picture" :src="val.picture" />
-          <span :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)" v-else>{{
-              val.name
-          }}</span>
-        </template>
-      </dd>
-    </dl>
-  </div>
-</template>
-<script>
+<script setup>
 import { watchEffect } from 'vue'
 import getPowerSet from './power-set'
+import { onMounted } from 'vue';
+
+const props = defineProps({
+  goods: {
+    // specs:所有的规格信息  skus:所有的sku组合
+      type: Object,
+      default: () => ({ specs: [], skus: [] })
+    }
+}) 
+//props里接收的数据没有value 直接使用就行
+//props里接收的数据没有value 直接使用就行
+//props里接收的数据没有value 直接使用就行
+//props里接收的数据没有value 直接使用就行
+//props里接收的数据没有value 直接使用就行
+onMounted(()=>{
+  console.log(props.goods)
+})
+const emit = defineEmits(
+  ['change']
+)
+
 const spliter = '★'
 // 根据skus数据得到路径字典对象
 const getPathMap = (skus) => {
   const pathMap = {}
+  //得到所有有效的Sku集合 
   if (skus && skus.length > 0) {
     skus.forEach(sku => {
       // 1. 过滤出有库存有效的sku
@@ -32,9 +38,9 @@ const getPathMap = (skus) => {
         // 4. 设置给路径字典对象
         powerSet.forEach(set => {
           const key = set.join(spliter)
-          // 如果没有就先初始化一个空数组
+          
           if (!pathMap[key]) {
-            pathMap[key] = []
+            pathMap[key] = [sku.id]
           }
           pathMap[key].push(sku.id)
         })
@@ -70,6 +76,9 @@ const getSelectedArr = (specs) => {
   return selectedArr
 }
 
+//如果规格按钮已经选中，忽略判断
+//如果规格按钮未选中，拿着按钮的name值按顺序套入匹配数组对应的位置，
+//最后过滤掉没有值的选项，通过-进行拼接成字符串key, 去路径字典中查找，没有找到则把当前规格按钮禁用
 // 更新按钮的禁用状态
 const updateDisabledStatus = (specs, pathMap) => {
   // 遍历每一种规格
@@ -88,62 +97,64 @@ const updateDisabledStatus = (specs, pathMap) => {
   })
 }
 
+let pathMap = {}
+watchEffect(() => {
+  // 得到所有字典集合
+  pathMap = getPathMap(props.goods.skus)
+  // 组件初始化的时候更新禁用状态
+  initDisabledStatus(props.goods.specs, pathMap)
+})
 
-export default {
-  name: 'XtxGoodSku',
-  props: {
-    // specs:所有的规格信息  skus:所有的sku组合
-    goods: {
-      type: Object,
-      default: () => ({ specs: [], skus: [] })
-    }
-  },
-  emits: ['change'],
-  setup (props, { emit }) {
-    let pathMap = {}
-    watchEffect(() => {
-      // 得到所有字典集合
-      pathMap = getPathMap(props.goods.skus)
-      // 组件初始化的时候更新禁用状态
-      initDisabledStatus(props.goods.specs, pathMap)
-    })
-
-    const clickSpecs = (item, val) => {
-      if (val.disabled) return false
-      // 选中与取消选中逻辑
-      if (val.selected) {
-        val.selected = false
-      } else {
-        item.values.forEach(bv => { bv.selected = false })
-        val.selected = true
-      }
-      // 点击之后再次更新选中状态
-      updateDisabledStatus(props.goods.specs, pathMap)
-      // 把选择的sku信息传出去给父组件
-      // 触发change事件将sku数据传递出去
-      const selectedArr = getSelectedArr(props.goods.specs).filter(value => value)
-      // 如果选中得规格数量和传入得规格总数相等则传出完整信息(都选择了)
-      // 否则传出空对象
-      if (selectedArr.length === props.goods.specs.length) {
-        // 从路径字典中得到skuId
-        const skuId = pathMap[selectedArr.join(spliter)][0]
-        const sku = props.goods.skus.find(sku => sku.id === skuId)
-        // 传递数据给父组件
-        emit('change', {
-          skuId: sku.id,
-          price: sku.price,
-          oldPrice: sku.oldPrice,
-          inventory: sku.inventory,
-          specsText: sku.specs.reduce((p, n) => `${p} ${n.name}：${n.valueName}`, '').trim()
-        })
-      } else {
-        emit('change', {})
-      }
-    }
-    return { clickSpecs }
+const clickSpecs = (item, val) => {
+  if (val.disabled) return false
+  // 选中与取消选中逻辑
+  if (val.selected) {
+    val.selected = false
+  } else {
+    item.values.forEach(val => { val.selected = false })
+    val.selected = true
   }
+  // 点击之后再次更新选中状态
+  console.log(props.goods.specs);
+  updateDisabledStatus(props.goods.specs, pathMap)
+  // 把选择的sku信息传出去给父组件
+  // 触发change事件将sku数据传递出去
+ const index = getSelectedArr(props.goods.specs).findIndex(item => item === undefined)
+  if (index > -1){
+    console.log('找到了，信息不完整')
+  } else {
+    // 从路径字典中得到skuId
+    const skuId = pathMap[getSelectedArr(props.goods.specs).join(spliter)][0]
+    const sku = props.goods.skus.find(sku => sku.id === skuId)
+    // 传递数据给父组件
+    emit('change', {
+      skuId: sku.id,
+      price: sku.price,
+      oldPrice: sku.oldPrice,
+      inventory: sku.inventory,
+      specsText: sku.specs.reduce((p, n) => `${p} ${n.name}：${n.valueName}`, '').trim()
+    })
+  } 
 }
 </script>
+
+<template>
+  <div class="goods-sku">
+    <dl v-for="item in goods.specs" :key="item.id">
+      <dt>{{ item.name }}</dt>
+      <dd>
+        <template v-for="val in item.values" :key="val.name">
+          <img :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)"
+          v-if="val.picture" :src="val.picture" />
+          <span :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)" 
+          v-else>{{
+              val.name
+          }}</span>
+        </template>
+      </dd>
+    </dl>
+  </div>
+</template>
 
 <style scoped lang="scss">
 @mixin sku-state-mixin {

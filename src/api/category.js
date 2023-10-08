@@ -1,5 +1,6 @@
 import request from "@/utils/http";
 
+//二级分类列表
 export function getCategoryAPI(id) {
   return request({
     url: "/category",
@@ -15,6 +16,7 @@ export function getCategoryAPI(id) {
  * @return {*}
  */
 
+//获取二级分类列表商品数据
 export const getCategoryFilterAPI = (id) => {
   return request({
     url: "/category/sub/filter",
@@ -23,6 +25,8 @@ export const getCategoryFilterAPI = (id) => {
     },
   });
 };
+
+
 /**
  * @description: 获取导航数据
  * @data { 
@@ -33,6 +37,8 @@ export const getCategoryFilterAPI = (id) => {
    } 
  * @return {*}
  */
+ 
+//获取Tab导航数据
 export const getSubCategoryAPI = (data) => {
   return request({
     url: "/category/goods/temporary",

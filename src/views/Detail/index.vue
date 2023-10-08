@@ -1,33 +1,71 @@
 <script setup>
-import { getDetail } from "@/apis/detail";
+import { getDetail } from "@/api/detail";
 import DetailHot from "@/views/Detail/components/DetailHot.vue";
+import { ElMessage } from "element-plus";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useCartStore } from "@/stores/cartStore";
+import { onBeforeRouteUpdate } from "vue-router";
 
+
+const cartStore = useCartStore();
 const goods = ref({});
 const route = useRoute();
-const getGoods = async () => {
-  const res = await getDetail(route.params.id);
+const getGoods = async (id=route.params.id) => {
+  const res = await getDetail(id);
   goods.value = res.result;
+  console.log(goods.value);
 };
 onMounted(() => getGoods());
+
+let skuObj = {};
 const skuChange = (sku) => {
   console.log(sku);
+  skuObj = sku;
 };
+const count = ref(1);
+const countChange = (count) => {
+  console.log(count);
+};
+
+const addCart = () => {
+  if (skuObj.skuId) {
+    cartStore.addCart({
+      id: goods.value.id,
+      name: goods.value.name,
+      pictures: goods.value.mainPictures[0],
+      price: goods.value.price,
+      count: count.value,
+      skuId: skuObj.skuId,
+      attrsText: skuObj.specsText,
+      selected: true,
+    });
+  } else {
+    ElMessage.warning("请选择规格");
+  }
+};
+
+  // 目标:路由参数变化的时候 可以把分类数据接口重新发送
+  onBeforeRouteUpdate((to) => {
+    console.log(to);
+    // 存在问题：使用最新的路由参数请求最新的分类数据
+    getGoods(to.params.id);
+  });
 </script>
 
 <template>
   <div class="xtx-goods-page">
     <div class="container" v-if="goods.details">
+      <!-- 面包屑 -->
       <div class="bread-container">
         <el-breadcrumb separator=">">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
           <el-breadcrumb-item
-            :to="{ path: '`/category/${goods.categories[1].id}`' }"
+            :to="{ path: `/category/${goods.categories[1].id}` }"
             >{{ goods.categories[1].name }}
           </el-breadcrumb-item>
           <el-breadcrumb-item
-            :to="{ path: '`/category/sub/${goods.categories[0].id}`' }"
+            :to="{ path: `/category/sub/${goods.categories[0].id}` }"
             >{{ goods.categories[0].name }}
           </el-breadcrumb-item>
           <el-breadcrumb-item>抓绒保暖，毛毛虫子儿童运动鞋</el-breadcrumb-item>
@@ -90,10 +128,12 @@ const skuChange = (sku) => {
               <!-- sku组件 -->
               <XtxSku :goods="goods" @change="skuChange" />
               <!-- 数据组件 -->
-
+              <el-input-number v-model="count" @change="countChange" />
               <!-- 按钮组件 -->
               <div>
-                <el-button size="large" class="btn"> 加入购物车 </el-button>
+                <el-button size="large" class="btn" @click="addCart">
+                  加入购物车
+                </el-button>
               </div>
             </div>
           </div>
@@ -155,20 +195,7 @@ const skuChange = (sku) => {
     }
   }
 
-  .goods-footer {
-    display: flex;
-    margin-top: 20px;
-
-    .goods-article {
-      width: 940px;
-      margin-right: 20px;
-    }
-
-    .goods-aside {
-      width: 280px;
-      min-height: 1000px;
-    }
-  }
+ 
 
   .goods-tabs {
     min-height: 600px;
@@ -366,6 +393,21 @@ const skuChange = (sku) => {
   }
 }
 
+.goods-footer {
+    display: flex;
+    margin-top: 20px;
+
+    .goods-article {
+      width: 940px;
+      margin-right: 20px;
+    }
+
+    .goods-aside {
+      width: 280px;
+      min-height: 1000px;
+    }
+  }
+
 .btn {
   margin-top: 20px;
 }
@@ -374,3 +416,4 @@ const skuChange = (sku) => {
   padding: 25px 0;
 }
 </style>
+@/api/detail

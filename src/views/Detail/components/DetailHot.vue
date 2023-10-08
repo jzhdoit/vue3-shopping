@@ -1,11 +1,13 @@
 <script setup>
-import { getHotGoodsAPI } from "@/apis/detail";
+import { getHotGoodsAPI } from "@/api/detail";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-
 const props = defineProps({
   hotType: {
     type: Number,
+    //1代表24小时热销榜 2代表周热销榜 3代表总热销榜 
+    //可以使用type去适配title和数据列表
+    default:1
   },
 });
 
@@ -22,6 +24,7 @@ const getHotList = async () => {
     type: props.hotType,
   });
   hotList.value = res.result;
+  console.log(hotList.value);
 };
 onMounted(() => getHotList());
 </script>
@@ -31,7 +34,7 @@ onMounted(() => getHotList());
     <h3>{{ title }}</h3>
     <!-- 商品区块 -->
     <RouterLink
-      to="/"
+      :to="{path:`/detail/${item.id}`}"
       class="goods-item"
       v-for="item in hotList"
       :key="item.id"
@@ -88,3 +91,4 @@ onMounted(() => getHotList());
   }
 }
 </style>
+@/api/detail

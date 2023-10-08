@@ -4,12 +4,12 @@ import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import "element-plus/theme-chalk/el-message.css";
 import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user";
+import { useUserStore } from "@/stores/userStore.js";
 
 const userStore = useUserStore();
 const form = ref({
-  account: "",
-  password: "",
+  account: "12056258282",
+  password: "hm#qd@23!",
   agree: true,
 });
 const rules = {
@@ -36,13 +36,14 @@ const formRef = ref(null);
 const router = useRouter();
 const doLogin = () => {
   const { account, password } = form.value;
+  // 调用实例方法
   formRef.value.validate(async (valid) => {
-    console.log(valid);
+    
     if (valid) {
       await userStore.getUserInfo({ account, password });
 
       ElMessage({ type: "success", message: "登录成功" });
-      router.replace({ path: "/" });
+      router.push({ path: "/" });
     }
   });
 };
@@ -83,7 +84,7 @@ const doLogin = () => {
               <el-form-item prop="password" label="密码">
                 <el-input v-model="form.password" />
               </el-form-item>
-              <el-form-item prop="agree" label-width="22px">
+              <el-form-item prop="agree" label-width="20px">
                 <el-checkbox size="large" v-model="form.agree">
                   我已同意隐私条款和服务条款
                 </el-checkbox>
